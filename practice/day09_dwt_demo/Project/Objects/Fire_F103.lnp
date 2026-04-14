@@ -1,0 +1,15 @@
+--cpu Cortex-M3
+".\objects\startup_stm32f103xb.o"
+".\objects\system_stm32f1xx.o"
+".\objects\stm32f1xx_hal.o"
+".\objects\stm32f1xx_hal_cortex.o"
+".\objects\stm32f1xx_hal_gpio.o"
+".\objects\stm32f1xx_hal_rcc.o"
+".\objects\main.o"
+".\objects\stm32f1xx_it.o"
+".\objects\bsp_dwt.o"
+".\objects\bsp_led.o"
+--strict --scatter ".\Objects\Fire_F103.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\Fire_F103.map" -o .\Objects\Fire_F103.axf
