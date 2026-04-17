@@ -1,0 +1,19 @@
+
+#ifndef __MAIN_H
+#define __MAIN_H
+
+/* Includes ------------------------------------------------------------------*/
+#include "stm32f1xx_hal.h"
+#include <stdio.h>
+
+
+#include <string.h>
+#include <stdlib.h>
+
+/* Exported types ------------------------------------------------------------*/
+/* Exported constants --------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
+/* Exported functions ------------------------------------------------------- */
+void ERROR_Handler(void);
+#endif /* __MAIN_H */
+
