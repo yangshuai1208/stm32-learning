@@ -1,5 +1,8 @@
 #include "bsp_dwt.h" 
 
+static uint8_t s_dwt_ready = 0U;
+
+
 
 /**
   * @brief  初始化DWT计数器
@@ -17,6 +20,13 @@ void DWT_Init(void)
     
     /* 使能Cortex-M DWT CYCCNT寄存器 */
     DWT_CTRL  |=(uint32_t)DWT_CTRL_CYCCNTENA;
+
+    uint32_t tick_start = DWT_CYCCNT;
+    for (volatile uint32_t i = 0; i < 1000U; i++)
+    {
+        __NOP();
+    }
+    s_dwt_ready = (DWT_CYCCNT != tick_start) ? 1U : 0U;
 }
 
 
@@ -50,6 +60,16 @@ uint32_t DWT_TickToMicrosecond(uint32_t tick,uint32_t frequency)
   */
 void DWT_DelayUs(uint32_t time)
 {
+    if (s_dwt_ready == 0U)
+    {
+        uint32_t loops = time * (SystemCoreClock / 8000000U + 1U);
+        while (loops-- > 0U)
+        {
+            __NOP();
+        }
+        return;
+    }
+
     /* 将微秒转化为对应的时钟计数值*/
     uint32_t tick_duration= time * (SystemCoreClock / 1000000) ;
     uint32_t tick_start = DWT_GetTick();         /* 刚进入时的计数器值 */

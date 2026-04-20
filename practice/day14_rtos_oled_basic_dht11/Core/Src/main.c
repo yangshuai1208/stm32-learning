@@ -61,6 +61,8 @@ void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 static void Debug_SendText(const char *text);
+static void Board_Blink(uint8_t times, uint32_t delay_ms);
+static void Error_BlinkLoop(void);
 
 /* USER CODE END PFP */
 
@@ -74,6 +76,46 @@ static void Debug_SendText(const char *text)
   }
 
   HAL_UART_Transmit(&huart1, (uint8_t *)text, (uint16_t)strlen(text), 100);
+}
+
+static void Board_Blink(uint8_t times, uint32_t delay_ms)
+{
+  for (uint8_t i = 0; i < times; i++)
+  {
+    HAL_GPIO_TogglePin(GPIOA, LED_R_Pin | LED_G_Pin | LED_B_Pin);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    HAL_Delay(delay_ms);
+    HAL_GPIO_TogglePin(GPIOA, LED_R_Pin | LED_G_Pin | LED_B_Pin);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    HAL_Delay(delay_ms);
+  }
+}
+
+static void Error_BlinkLoop(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+  GPIO_InitStruct.Pin = LED_R_Pin | LED_G_Pin | LED_B_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  while (1)
+  {
+    HAL_GPIO_TogglePin(GPIOA, LED_R_Pin | LED_G_Pin | LED_B_Pin);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    for (volatile uint32_t delay = 0; delay < 250000U; delay++)
+    {
+      __NOP();
+    }
+  }
 }
 
 /* USER CODE END 0 */
@@ -98,6 +140,9 @@ int main(void)
 
   /* USER CODE END Init */
 
+  MX_GPIO_Init();
+  Board_Blink(2, 80);
+
   /* Configure the system clock */
   SystemClock_Config();
 
@@ -106,11 +151,10 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_I2C1_Init();
 	DWT_Init();
-		DHT11_GPIO_Config();
+	DHT11_GPIO_Config();
   /* USER CODE BEGIN 2 */
   Debug_SendText("BOOT\r\n");
   if (OLED_Init() == SUCCESS)
@@ -123,15 +167,19 @@ int main(void)
   }
   else
   {
-    Debug_SendText("OLED FAIL\r\n");
+   Debug_SendText("OLED FAIL\r\n");
   }
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
+  Debug_SendText("RTOS INIT\r\n");
   MX_FREERTOS_Init();
+  Debug_SendText("RTOS READY\r\n");
 
   /* Start scheduler */
+  Debug_SendText("KERNEL START\r\n");
   osKernelStart();
+  Debug_SendText("KERNEL RETURN\r\n");
 
   /* We should never get here as control is now taken by the scheduler */
 
@@ -181,20 +229,44 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) == HAL_OK)
+  {
+    /** Initializes the CPU, AHB and APB buses clocks
+    */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                                |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) == HAL_OK)
+    {
+      return;
+    }
+  }
+
+  HAL_RCC_DeInit();
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSEState = RCC_HSE_OFF;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
@@ -229,9 +301,7 @@ void Error_Handler(void)
     Debug_SendText("ERROR HANDLER\r\n");
   }
   __disable_irq();
-  while (1)
-  {
-  }
+  Error_BlinkLoop();
   /* USER CODE END Error_Handler_Debug */
 }
 
