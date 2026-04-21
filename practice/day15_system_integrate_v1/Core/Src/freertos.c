@@ -70,7 +70,6 @@ static StackType_t uartTaskStack[256];
 static StaticTask_t sensorTaskControlBlock;
 static StackType_t sensorTaskStack[256];
 /* USER CODE END Variables */
-osThreadId defaultTaskHandle;
 osThreadId ledTaskHandle;
 osThreadId uartTaskHandle;
 osThreadId sensorTaskHandle;
@@ -81,7 +80,6 @@ static void Serial_SendText(const char *text);
 
 /* USER CODE END FunctionPrototypes */
 
-void StartDefaultTask(void const * argument);
 void StartLEDTask(void const * argument);
 void StartUartTask(void const * argument);
 void StartSensorTask(void const * argument);
@@ -143,46 +141,31 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of sensorTask */
   osThreadStaticDef(sensorTask, StartSensorTask, osPriorityHigh, 0, 256, sensorTaskStack, &sensorTaskControlBlock);
   sensorTaskHandle = osThreadCreate(osThread(sensorTask), NULL);
-		if (sensorTaskHandle == NULL)
-	{
-			Error_Handler();
-	}
+  if (sensorTaskHandle == NULL)
+  {
+    Error_Handler();
+  }
+
   /* definition and creation of ledTask */
   osThreadStaticDef(ledTask, StartLEDTask, osPriorityNormal, 0, 256, ledTaskStack, &ledTaskControlBlock);
   ledTaskHandle = osThreadCreate(osThread(ledTask), NULL);
-		if (ledTaskHandle == NULL)
-	{
-			Error_Handler();
-	}
+  if (ledTaskHandle == NULL)
+  {
+    Error_Handler();
+  }
+
   /* definition and creation of uartTask */
   osThreadStaticDef(uartTask, StartUartTask, osPriorityNormal, 0, 256, uartTaskStack, &uartTaskControlBlock);
   uartTaskHandle = osThreadCreate(osThread(uartTask), NULL);
-	if (uartTaskHandle == NULL)
-{
+  if (uartTaskHandle == NULL)
+  {
     Error_Handler();
-}
+  }
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
-}
-
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
-{
-  /* USER CODE BEGIN StartDefaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartDefaultTask */
 }
 
 /* USER CODE BEGIN Header_StartLEDTask */

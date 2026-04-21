@@ -124,8 +124,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_USART1_UART_Init();
   MX_I2C1_Init();
-	DWT_Init();
-	DHT11_GPIO_Config();
+  DWT_Init();
+  DHT11_GPIO_Config();
   /* USER CODE BEGIN 2 */
   if (OLED_Init() == SUCCESS)
   {
@@ -150,20 +150,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    HAL_GPIO_TogglePin(GPIOA, LED_R_Pin);
-    if (g_oled_ready == 0U)
-    {
-      g_oled_ready = (OLED_Init() == SUCCESS) ? 1U : 0U;
-    }
-
-    if (g_oled_ready != 0U)
-    {
-      OLED_CLS();
-      OLED_ShowString_F8X16(0,0, (uint8_t*)"DHT11");
-      OLED_ShowString_F8X16(1,0, (uint8_t*)"RTOS STOP");
-    }
-
-    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
