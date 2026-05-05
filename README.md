@@ -1,189 +1,111 @@
-# STM32 学习仓库（第二阶段）
+# STM32 + FreeRTOS 30天学习项目
 
-## 一、仓库说明
+## 一、项目简介
 
-这个仓库用于记录我在嵌入式学习路线中第二阶段的学习过程。  
-第二阶段的核心目标是：
+本仓库记录了我第二阶段 STM32 + FreeRTOS 的 30 天学习过程。
 
-- 系统掌握 STM32 基础外设
-- 学会使用 CubeMX + HAL + Keil 搭建工程
-- 完成 FreeRTOS 基础学习与任务拆分
-- 完成一个可运行、可展示、可写进简历的嵌入式小项目
-- 为下一阶段 Linux 和更完整的嵌入式项目开发打基础
+本阶段以 STM32F103C8T6 为主控，基于 HAL 库、STM32CubeMX 和 Keil MDK 进行开发，从 GPIO、USART、I2C、DHT11、OLED 等基础外设入手，逐步引入 FreeRTOS 多任务、队列、互斥量、事件标志组、Flash 配置保存、IWDG 看门狗和 ESP8266 AT 指令通信框架，最终整合为一个基于 STM32 + FreeRTOS 的环境监测与报警系统。
+
+项目目标不是单纯学习外设 API，而是完成一个能够展示、能够写进简历、能够在面试中讲清楚的嵌入式综合项目。
 
 ---
 
-## 二、我的学习路线
+## 二、最终项目名称
 
-我的整体学习路线分为三个阶段：
-
-### 第一阶段
-C 语言基础 + 数据结构
-
-### 第二阶段
-STM32 + FreeRTOS + 常用外设 + 小项目整合
-
-### 第三阶段
-Linux 基础 + Linux C / 驱动 / 网络编程（后续继续更新）
-
-本仓库对应的是 **第二阶段**。
+**基于 STM32F103 + FreeRTOS 的环境监测与报警系统**
 
 ---
 
-## 三、第二阶段学习目标
+## 三、开发环境
 
-第二阶段不是单纯“学几个外设”，而是完成下面这几件事：
-
-1. 学会 STM32 工程搭建流程
-2. 掌握常用外设的基本原理和 HAL 写法
-3. 学会把多个模块整合到同一个工程中
-4. 学会 FreeRTOS 基本任务模型
-5. 学会调试、整理、记录和展示项目
-6. 做出一个具备项目味道的嵌入式学习成果
-
----
-
-## 四、学习环境
-
-### 开发板
-- STM32F103C8T6
-
-### 开发工具
-- STM32CubeMX
-- Keil MDK
-- 串口调试助手
-- GitHub
-
-### 开发方式
-- 使用 CubeMX 配置外设
-- 使用 HAL 库编写代码
-- 使用 Keil 进行编译、下载和调试
+| 项目 | 内容 |
+|---|---|
+| 主控芯片 | STM32F103C8T6 |
+| 开发方式 | STM32CubeMX + HAL 库 |
+| IDE | Keil MDK |
+| RTOS | FreeRTOS / CMSIS-RTOS v1 |
+| 调试方式 | USART1 串口调试 |
+| 代码管理 | Git + GitHub |
+| 编译器 | ARMCC V5 |
 
 ---
 
-## 五、第二阶段 30 天学习计划总览
+## 四、硬件模块
 
-第二阶段共分为 30 天，按“前 21 天做功能，后 9 天做整合和优化”的思路推进。
-
----
-
-### 第 1 阶段：STM32 打通（Day1 ~ Day7）
-
-目标：把 STM32 基础链路打通，建立最小可运行工程。
-
-- Day1：CubeMX 建工程 + GPIO 点灯
-- Day2：USART 串口发送 + printf 重定向
-- Day3：串口中断接收 + 回显
-- Day4：定时器中断
-- Day5：整合成一个基础裸机小系统
-- Day6：模块化拆分 + 结构体组织数据
-- Day7：整理第一周代码、README、notes、提交规范
+| 模块 | 作用 |
+|---|---|
+| STM32F103C8T6 | 主控芯片 |
+| DHT11 | 温湿度采集 |
+| OLED 0.96 寸 I2C | 显示温湿度和报警状态 |
+| 按键 | 修改报警阈值 |
+| LED | 系统运行状态指示 |
+| Flash | 保存配置参数 |
+| IWDG | 系统异常恢复 |
+| ESP8266 | WiFi 通信扩展 |
+| USART1 | 电脑串口调试 |
+| USART2 | ESP8266 AT 指令通信 |
 
 ---
 
-### 第 2 阶段：FreeRTOS + 显示/传感器基础（Day8 ~ Day14）
+## 五、最终系统功能
 
-目标：让系统从“裸机功能”升级到“多任务系统”。
+当前项目已经实现或预留以下功能：
 
-- Day8：FreeRTOS 移植 + 创建任务
-- Day9：任务调度 + `osDelay` / `vTaskDelay`
-- Day10：任务拆分（基础任务模型）
-- Day11：任务结构整理 + 多任务调试
-- Day12：I2C + OLED 显示
-- Day13：OLED 接入 FreeRTOS 工程
-- Day14：DHT11 + OLED + 串口 多任务联调
+- DHT11 温湿度采集
+- OLED 实时显示温湿度和报警状态
+- USART1 串口输出系统运行日志
+- 温湿度报警状态判断
+- 按键修改报警阈值
+- Flash 掉电保存配置参数
+- FreeRTOS 多任务调度
+- FreeRTOS 队列传递传感器数据
+- FreeRTOS 互斥量保护共享资源
+- FreeRTOS 事件标志组监控系统状态
+- IWDG 独立看门狗任务健康检测
+- ESP8266 AT 指令通信框架
+- WiFi 状态事件监控框架
 
----
-
-### 第 3 阶段：系统整合（Day15 ~ Day21）
-
-目标：把前面的模块整合成一个像样的小项目。
-
-- Day15：系统结构整理 + 稳定化
-- Day16：状态统计 + 成功/失败计数
-- Day17：任务架构最终版
-- Day18：数据流进一步整理
-- Day19：排查外设冲突、稳定运行测试
-- Day20：连续运行测试 + 调试优化
-- Day21：工程目录整理 + 项目结构固定
+说明：ESP8266 当前已完成 AT 指令通信框架，后续需要继续确认模块 AT 固件、波特率和 WiFi 连接状态，再扩展 HTTP / TCP / MQTT 数据上传。
 
 ---
 
-### 第 4 阶段：项目包装与提升（Day22 ~ Day30）
-
-目标：把“能跑”变成“能展示、能写简历、能面试”。
-
-- Day22：增加日志和调试输出
-- Day23：补项目文档和架构图
-- Day24：尝试低功耗思路
-- Day25：增加异常报警机制
-- Day26：优化任务优先级和刷新策略
-- Day27：完善 README 和项目说明
-- Day28：准备项目演示截图/视频
-- Day29：整理面试问答和项目讲解
-- Day30：最终收尾、检查代码和提交记录
-
----
-
-## 六、当前阶段重点学习内容
-
-在第二阶段，我重点学习以下内容：
-
-### 1. STM32 基础外设
-- RCC 时钟
-- GPIO
-- USART
-- EXTI
-- TIM 定时器
-- I2C
-
-### 2. 常用模块
-- OLED 显示屏
-- DHT11 温湿度传感器
-
-### 3. FreeRTOS 基础
-- 任务创建
-- 任务调度
-- 任务延时
-- 多任务结构拆分
-- 共享数据组织
-
-### 4. 工程能力
-- 代码模块化
-- 目录整理
-- README 编写
-- Notes 学习记录
-- GitHub 规范提交
-
----
-
-## 七、仓库结构说明
-
-本仓库按照“按天记录 + 项目逐步演进”的方式组织。
-
-示例结构如下：
+## 六、系统整体架构
 
 ```text
-stm32-learning
-├── practice
-│   ├── day01_gpio_led
-│   ├── day02_uart_printf
-│   ├── day03_uart_interrupt
-│   ├── day04_timer_interrupt
-│   ├── day05_basic_system
-│   ├── day08_freertos_basic
-│   ├── day12_oled_i2c
-│   ├── day14_freertos_dht11_oled
-│   ├── day16_status_monitor_v2
-│   └── day17_task_arch_final
-├── notes
-│   ├── day01.md
-│   ├── day02.md
-│   ├── ...
-│   └── day30.md
-└── README.md
+DHT11
+  ↓
+sensorTask
+  ↓
+SensorMessage Queue
+  ↓
+uartTask → USART1 → 串口助手
 
-## 目录结构
-```text
-practice/    每天的工程代码
-notes/       每天的学习笔记
+sensorTask
+  ↓
+g_sensor_data
+  ↓
+displayTask → OLED 显示
+
+keyTask
+  ↓
+g_app_config
+  ↓
+Flash 保存配置
+
+sensorTask / displayTask / uartTask / keyTask / espTask
+  ↓
+EventGroup
+  ↓
+monitorTask → 输出系统状态
+
+watchdogTask
+  ↓
+检查任务心跳
+  ↓
+IWDG 喂狗
+
+espTask
+  ↓
+USART2
+  ↓
+ESP8266
